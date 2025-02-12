@@ -2,11 +2,19 @@ import { Request, Response } from "express";
 import { asyncController } from "@/utils/handlers";
 import { asyncStorageSerivce } from "../services";
 
+/**
+ * Interface representing a generic shared controllers across multiple controllers
+ * that needs curd.
+ * It extends the child service with needed fcuntionality of curd.
+ */
 class Controller<T> {
   constructor(protected service: T) {
     this.service = service;
   }
 
+  /**
+   * fetch entity with pagniation.
+   */
   fetch = asyncController(async (req: Request, res: Response) => {
     const paginate = {
       page: parseInt(req.query.page as string, 10) || 1,
@@ -17,6 +25,9 @@ class Controller<T> {
     res.status(200).json({ data, status: true, message: "Data fetched" });
   });
 
+  /**
+   * search with key word
+   */
   search = asyncController(async (req: Request, res: Response) => {
     const paginate = {
       page: parseInt(req.query.page as string, 10) || 1,
@@ -28,6 +39,9 @@ class Controller<T> {
     res.status(200).json({ data, status: true, message: "Search results" });
   });
 
+  /**
+   * create entity record
+   */
   create = asyncController(async (req: Request, res: Response) => {
     const orgUID = await asyncStorageSerivce.getOrgUID();
 
@@ -37,6 +51,9 @@ class Controller<T> {
       .json({ data, status: true, message: "Created successfully" });
   });
 
+  /**
+   * update entity record
+   */
   update = asyncController(async (req: Request, res: Response) => {
     const orgUID = await asyncStorageSerivce.getOrgUID();
     const data = await (this.service as any).update(
@@ -49,6 +66,9 @@ class Controller<T> {
       .json({ data, status: true, message: "Updated successfully" });
   });
 
+  /**
+   * delete entity record
+   */
   delete = asyncController(async (req: Request, res: Response) => {
     const orgUID = await asyncStorageSerivce.getOrgUID();
     const data = await (this.service as any).delete(

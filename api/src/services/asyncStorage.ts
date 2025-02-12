@@ -1,28 +1,14 @@
 import { AsyncLocalStorage } from "async_hooks";
-import { IAsyncStorageService, StorageKeys } from "../types/asyncStorage";
-
-/**
- * Interface representing the context stored in AsyncLocalStorage.
- * This context holds request-specific information such as the organization UID and user UID.
- */
-interface AsyncStorageContext {
-  /**
-   * The unique identifier for the organization.
-   */
-  orgUID?: string;
-
-  /**
-   * The unique identifier for the user.
-   */
-  userUID?: string;
-
-  // You can add more keys if needed
-}
+import {
+  IAsyncStorageService,
+  IStorageKeys,
+  IAsyncStorageContext,
+} from "../types/asyncStorage";
 
 /**
  * Storage keys used for accessing specific pieces of data in the async storage context.
  */
-const storageKeys: StorageKeys = {
+const storageKeys: IStorageKeys = {
   orgUID: "orgUID",
   userUID: "userUID",
 } as const;
@@ -40,17 +26,9 @@ class AsyncStorageService implements IAsyncStorageService {
    * The AsyncLocalStorage instance is typed with AsyncStorageContext, which allows
    * us to safely store and retrieve values using string keys.
    */
-  private readonly store: AsyncLocalStorage<AsyncStorageContext>;
-
-  private static instance: AsyncLocalStorage<AsyncStorageContext>;
-
-  constructor() {
-    if (!AsyncStorageService.instance) {
-      AsyncStorageService.instance =
-        new AsyncLocalStorage<AsyncStorageContext>();
-    }
-    this.store = AsyncStorageService.instance;
-  }
+  constructor(
+    private readonly store: AsyncLocalStorage<IAsyncStorageContext>
+  ) {}
 
   /**
    * Retrieves the organization UID from the async storage context.
@@ -59,7 +37,7 @@ class AsyncStorageService implements IAsyncStorageService {
    */
   async getOrgUID(): Promise<string | null> {
     const context = this.store.getStore();
-    return context?.[storageKeys.orgUID as keyof AsyncStorageContext] || null;
+    return context?.[storageKeys.orgUID as keyof IAsyncStorageContext] || null;
   }
 
   /**
@@ -69,7 +47,7 @@ class AsyncStorageService implements IAsyncStorageService {
    */
   async getUserUID(): Promise<string | null> {
     const context = this.store.getStore();
-    return context?.[storageKeys.orgUID as keyof AsyncStorageContext] || null;
+    return context?.[storageKeys.userUID as keyof IAsyncStorageContext] || null;
   }
 
   /**
@@ -83,7 +61,7 @@ class AsyncStorageService implements IAsyncStorageService {
     if (!context) {
       throw new Error("Async storage context is not available");
     }
-    context[storageKeys.orgUID as keyof AsyncStorageContext] = orgUID;
+    context[storageKeys.orgUID as keyof IAsyncStorageContext] = orgUID;
   }
 
   /**
@@ -97,7 +75,23 @@ class AsyncStorageService implements IAsyncStorageService {
     if (!context) {
       throw new Error("Async storage context is not available");
     }
-    context[storageKeys.userUID as keyof AsyncStorageContext] = userUID;
+    context[storageKeys.userUID as keyof IAsyncStorageContext] = userUID;
+  }
+
+  /**
+   * Replace given store with the given store object.
+   * @param data - The data to replace the store with
+   */
+  async enterWith(data: any): Promise<void> {
+    this.store.enterWith(data);
+  }
+
+  /**
+   * Runs a function synchronously outside of a context and returns its return value.
+   * @param fn - function to run within the exit store method
+   */
+  async exit(fn: Function): Promise<void> {
+    this.store.exit(() => fn());
   }
 }
 
