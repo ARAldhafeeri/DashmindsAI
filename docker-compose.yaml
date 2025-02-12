@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  mongo:
+    image: mongo:latest
+    container_name: mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: app
+    depends_on:
+      - mongo
+    env_file:
+      - ./api/.env
+    ports:
+      - "3000:3000"
+
+  # redis:
+  #   image: redis:latest
+  #   restart: always
+  #   ports:
+  #     - "6379:6379"
+  #   volumes:
+  #     - redis:/root/redis
+  #   env_file:
+  #     - ./.env
+  #   environment:
+  #     - REDIS_PORT=6379
+  #   entrypoint: redis-server --appendonly yes  --requirepass ${REDIS_PASSWORD}
+
+
+volumes:
+  mongo_data:
+  redis:
+
+networks:
+  default:
+    driver: bridge

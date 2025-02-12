@@ -1,5 +1,5 @@
 import { IService, IBaseEntity, IRepository } from "../types/generic";
-import { Types } from "mongoose";
+import { FilterQuery, Types } from "mongoose";
 import ObjectId = Types.ObjectId;
 
 /**
@@ -26,6 +26,16 @@ export class Service<T extends IBaseEntity> implements IService<T> {
       pageSize: data.length,
       data: data,
     };
+  }
+
+  /**
+   * Retrieves single record
+   * @param organization : orgianzation uid
+   * @param pagination : pagination context page, limit.
+   * @returns A promise that resolves to the record with pagination data.
+   */
+  async findOne(filter: FilterQuery<T>): Promise<any> {
+    return this.repository.findOne(filter);
   }
 
   /**

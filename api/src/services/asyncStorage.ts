@@ -11,6 +11,7 @@ import {
 const storageKeys: IStorageKeys = {
   orgUID: "orgUID",
   userUID: "userUID",
+  role: "role",
 } as const;
 
 /**
@@ -41,16 +42,6 @@ class AsyncStorageService implements IAsyncStorageService {
   }
 
   /**
-   * Retrieves the user UID from the async storage context.
-   *
-   * @returns A promise that resolves to the user UID or null if not set.
-   */
-  async getUserUID(): Promise<string | null> {
-    const context = this.store.getStore();
-    return context?.[storageKeys.userUID as keyof IAsyncStorageContext] || null;
-  }
-
-  /**
    * Stores the organization UID in the async storage context.
    *
    * @param orgUID - The organization UID to be stored.
@@ -62,6 +53,40 @@ class AsyncStorageService implements IAsyncStorageService {
       throw new Error("Async storage context is not available");
     }
     context[storageKeys.orgUID as keyof IAsyncStorageContext] = orgUID;
+  }
+
+  /**
+   * Retrieves the user UID from the async storage context.
+   *
+   * @returns A promise that resolves to the user UID or null if not set.
+   */
+  async getUserUID(): Promise<string | null> {
+    const context = this.store.getStore();
+    return context?.[storageKeys.userUID as keyof IAsyncStorageContext] || null;
+  }
+
+  /**
+   * Stores the user role in the async storage context.
+   *
+   * @param role -user role within the system
+   * @throws Error if the async storage context is not available.
+   */
+  async setRole(role: string): Promise<void> {
+    const context = this.store.getStore();
+    if (!context) {
+      throw new Error("Async storage context is not available");
+    }
+    context[storageKeys.role as keyof IAsyncStorageContext] = role;
+  }
+
+  /**
+   * Retrieves the user role from the async storage context.
+   *
+   * @returns A promise that resolves to the role or null if not set.
+   */
+  async getRole(): Promise<string | null> {
+    const context = this.store.getStore();
+    return context?.[storageKeys.role as keyof IAsyncStorageContext] || null;
   }
 
   /**

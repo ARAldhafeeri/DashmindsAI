@@ -49,7 +49,7 @@ export interface IService<T extends IBaseEntity> {
   find(organization: string, pagination: Paginate): Promise<T[]>;
   create(record: T, organization: string): Promise<T>;
   update(record: T, organization: string, recordID: string): Promise<T>;
-  findOne?(filter: FilterQuery<T>): Promise<T>;
+  findOne(filter: FilterQuery<T>): Promise<T>;
   delete(id: string, organization: string): Promise<T>;
   search(
     text: string,
